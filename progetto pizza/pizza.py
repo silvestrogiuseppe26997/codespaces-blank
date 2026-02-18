@@ -3,53 +3,64 @@ from streamlit_lottie import st_lottie
 import requests
 import time
 
-# 1. Configurazione pagina (Cambiata l'icona in pizza)
-st.set_page_config(page_title="Serata Pizza?", page_icon="🍕")
+# 1. CONFIGURAZIONE PAGINA
+st.set_page_config(page_title="Proposta Speciale 🍕", page_icon="🍕")
 
-# Funzione per caricare animazioni
+# Funzione per caricare le animazioni da LottieFiles
 def load_lottieurl(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
 
-# 2. Nuova animazione: Una pizza che balla o viene sfornata
-# Ho sostituito il link con uno a tema pizza
-lottie_pizza = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_j9Y0Zl.json") 
+# Carichiamo l'animazione della pizza (Link testato e funzionante)
+lottie_pizza = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_j9Y0Zl.json")
 
-# --- INTERFACCIA ---
-st.title("Ho una proposta per te... 🍕")
-
+# 2. GESTIONE DELLO STATO (Per non far sparire tutto al click)
 if "button_clicked" not in st.session_state:
     st.session_state.button_clicked = False
 
 def click_button():
     st.session_state.button_clicked = True
 
-# Bottone iniziale
+# --- INTERFACCIA UTENTE ---
+
+st.title("Ehilà! Ho un messaggio per te... 💌")
+
 if not st.session_state.button_clicked:
-    st.write("Ho una voglia matta di qualcosa di buono...")
-    st.button("Cosa mangiamo stasera? 🤔", on_click=click_button)
+    # Schermata iniziale
+    st.write("Clicca sul pulsante qui sotto per scoprire di cosa si tratta!")
+    st.button("Clicca qui! 🍕", on_click=click_button)
 else:
-    # Mostra l'animazione della pizza
-    st_lottie(lottie_pizza, height=300, key="pizza_anim")
+    # Schermata dopo il click
     
-    # Messaggio che appare gradualmente
-    placeholder = st.empty()
-    # 3. Frase personalizzata per la pizza
-    full_text = "Stasera ordiniamo una bella pizza? Scelgo io o scegli tu? 🍕❤️"
+    # Creiamo dei contenitori separati per evitare errori di rendering nel browser
+    container_pizza = st.container()
+    container_testo = st.empty()
     
-    displayed_text = ""
-    for char in full_text:
-        displayed_text += char
-        placeholder.subheader(displayed_text)
-        time.sleep(0.07) # Leggermente più veloce per non annoiare
+    # Mostriamo la pizza in alto
+    with container_pizza:
+        if lottie_pizza:
+            st_lottie(lottie_pizza, height=300, key="pizza_animation")
+        else:
+            st.write("🍕 (Immagina una pizza deliziosa qui!)")
+
+    # Effetto scrittura a macchina per il testo
+    testo_finale = "Stasera ordiniamo una bella pizza? 🍕"
+    scrittura = ""
     
-    # Palloncini finali (puoi anche toglierli se vuoi solo la pizza)
-    st.balloons() 
+    for carattere in testo_finale:
+        scrittura += carattere
+        container_testo.subheader(scrittura)
+        time.sleep(0.06) # Velocità della "macchina da scrivere"
+
+    # Pioggia di palloncini finale
+    st.balloons()
     
-    # Un piccolo tocco extra: un selettore per la pizza!
+    # Bonus: Scelta del gusto
     st.write("---")
-    gusto = st.selectbox("Quale prendiamo?", ["Margherita Classica", "Diavola", "Bufala", "Pistacchio e Mortazza", "Quella che vuoi tu!"])
-    if st.button("Conferma Ordine! ✅"):
-        st.success(f"Ottima scelta! La {gusto} sta già arrivando (nella mia testa)!")
+    scelta = st.selectbox("Quale gusto preferisci?", 
+                          ["Margherita", "Diavola", "Bufala", "Crostino", "Scegli tu, mi fido!"])
+    
+    if st.button("Conferma Scelta! ✅"):
+        st.success(f"Ottimo! Allora aggiudicato: {scelta}! 🚀")
